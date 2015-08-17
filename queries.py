@@ -21,12 +21,24 @@ sixOlder = session.query(Puppy).filter(and_(Puppy.dateOfBirth > '2015-01-16'))
 
 weightAsc = session.query(Puppy).order_by(asc(Puppy.weight))
 
-shelterGroup = session.query(Puppy).add_columns(Puppy.name, Puppy.shelter_id,\
+oldshelterGroup = session.query(Puppy).add_columns(Puppy.name, Puppy.shelter_id,\
     Puppy.id).group_by(Puppy.shelter_id)
 
 maxName = session.query(Puppy).add_columns(Puppy.name,func.char_length\
     (Puppy.name) ).group_by(Puppy.name).order_by(desc(func.char_length(Puppy.name)))
 
+shelterGroup = session.query(Shelter, Puppy).\
+    join(Puppy).\
+    filter(Shelter.id == Puppy.shelter_id).\
+    group_by(Puppy.shelter_id).\
+    values(Shelter.id, Puppy.name)
+
+reverseGroup = session.query(Puppy, Shelter).\
+    join(Shelter).\
+    filter(Puppy.shelter_id == Shelter.id).\
+    group_by(Shelter.id).\
+    values(Shelter.id, Puppy.name)
+    
 def printNames():
     print "Name Ascending"
     print 'Name'+ ' ' * ((maxName.first()[2])-4) + '|' + "Id"
@@ -54,5 +66,4 @@ def printShelters():
     for pup in shelterGroup:
         print pup.name
         print pup.id
-        print pup.shelter_id
 
